@@ -1,6 +1,6 @@
 # Frappe Paystack Integration
 
-**Frappe Paystack** is a seamless payment gateway integration for Frappe Framework and ERPNext that enables businesses to accept payments via [Paystack](https://paystack.com).
+**Frappe Paystack** is a seamless payment gateway integration for Frappe Framework and ERPNext (v15+) that enables businesses to accept payments via [Paystack](https://paystack.com).
 
 ---
 
@@ -17,7 +17,7 @@
 
 ## Installation & Setup
 
-Follow these steps to install and configure the Frappe Paystack app in your ERPNext/Frappe instance.
+Follow these steps to install and configure the Frappe Paystack app in your ERPNext/Frappe instance (v15 and v16 compatible).
 
 ### 1. Install the App
 
