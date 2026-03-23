@@ -38,7 +38,20 @@ def get_customer_contact(customer):
 
 @frappe.whitelist()
 def get_customer_email(customer):
-    return frappe.db.get_value("Customer", customer, "email_id") or ""
+    # First try to get email from Customer
+    email = frappe.db.get_value("Customer", customer, "email_id") or ""
+    if email:
+        return email
+    
+    # If no email in Customer, try to get it from linked Student
+    student = frappe.db.get_value("Student", {"customer": customer}, "name")
+    if student:
+        student_email = frappe.db.get_value("Student", student, "student_email_id") or ""
+        if student_email:
+            return student_email
+    
+    # Return empty string if no email found
+    return ""
 
 
 
