@@ -1,4 +1,5 @@
 import frappe, json, requests
+from frappe.utils import flt, fmt_money
 
 PAYMENT_LOG = "Paystack Payment Log"
 
@@ -12,6 +13,17 @@ def get_context(context):
             doc = frappe.get_doc(PAYMENT_LOG, reference)
             context.doc = doc.get_data()
             context.reference = reference
+            
+            # Fetch company branding
+            company = frappe.get_doc("Company", doc.company)
+            context.company = {
+                "name": company.company_name,
+                "logo": company.company_logo or "",
+                "address": company.address or "",
+                "phone": company.phone_no or "",
+                "email": company.email or "",
+                "currency": company.default_currency or "KES",
+            }
         else:
             context.reference = None
 

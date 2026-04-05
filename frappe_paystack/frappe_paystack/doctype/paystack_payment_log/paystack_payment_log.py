@@ -144,12 +144,30 @@ class PaystackPaymentLog(Document):
     def get_data(self):
         order = frappe.get_doc(self.linked_doctype, self.linked_docname)
         gateway_settings = self.get_payment_public_key()
+        
+        # Get customer name
+        customer_name = frappe.db.get_value("Customer", order.customer, "customer_name") or order.customer
+        
+        # Get student name if linked
+        student_name = ""
+        if frappe.db.exists("Student", {"customer": order.customer}):
+            student_name = frappe.db.get_value("Student", {"customer": order.customer}, "student_name") or ""
+        
+        # Calculate outstanding and already paid
+        grand_total = flt(getattr(order, "grand_total", 0))
+        outstanding = flt(getattr(order, "outstanding_amount", self.amount))
+        already_paid = grand_total - outstanding
+        
         data = {
             "customer": order.customer,
+            "customer_name": customer_name,
+            "student_name": student_name,
             "exchange_rate": order.conversion_rate,
             "order_currency": order.currency,
-            "grand_total": self.amount,
-            "payment_amount": round(self.amount * order.conversion_rate,2),
+            "grand_total": grand_total,
+            "outstanding_amount": outstanding,
+            "already_paid": already_paid,
+            "payment_amount": self.amount,
             "status": self.status,
             "order_status": order.status,
             "order_docstatus": order.docstatus,
@@ -157,7 +175,8 @@ class PaystackPaymentLog(Document):
             "reference_doctype":self.linked_doctype,
             "reference_docname":self.linked_docname,
             "email": get_customer_email(order.customer) or "",
-            "reference": self.name
+            "reference": self.name,
+            "company": self.company,
         }
         if gateway_settings:
             data.update(gateway_settings)

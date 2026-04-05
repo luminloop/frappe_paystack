@@ -22,7 +22,13 @@ frappe.ui.form.on("Sales Invoice", {
         }
 
         if (can_pay) {
-          frm.dashboard.add_comment(__("Paystack enabled"), "green", true);
+          frm.dashboard.add_comment(
+            __("Paystack enabled. Use the actions below to collect payment."),
+            "green",
+            true,
+          );
+
+          // Pay Now - opens checkout directly
           frm.add_custom_button(
             __("Pay Now"),
             () => {
@@ -36,6 +42,7 @@ frappe.ui.form.on("Sales Invoice", {
             __("Paystack"),
           );
 
+          // Send Payment Link via Email
           frm.add_custom_button(
             __("Send Payment Link"),
             () => {
@@ -65,32 +72,48 @@ frappe.ui.form.on("Sales Invoice", {
             __("Paystack"),
           );
 
+          // Partial Payment
           frm.add_custom_button(
             __("Partial Payment"),
             () => {
+              const max_amount = flt(frm.doc.outstanding_amount || 0);
               const partial_dialog = new frappe.ui.Dialog({
                 title: __("Partial Payment"),
                 fields: [
                   {
+                    fieldtype: "HTML",
+                    fieldname: "info",
+                    options: `
+                      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <span style="color: #166534; font-size: 13px;">Outstanding Amount</span>
+                          <span style="color: #166534; font-weight: 700; font-size: 18px;">${frm.doc.currency} ${max_amount.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    `,
+                  },
+                  {
                     fieldtype: "Currency",
                     fieldname: "amount",
-                    label: __(`Amount (${frm.doc.currency})`),
+                    label: __("Payment Amount"),
                     options: frm.doc.currency,
                     reqd: 1,
+                    description: __("Enter amount to pay (max: {0})", [max_amount.toLocaleString()]),
                   },
                   {
                     fieldtype: "Select",
                     fieldname: "mode",
-                    label: __("Payment Mode"),
-                    options: ["", "Pay Now", "Send Payment Link"],
+                    label: __("Action"),
+                    options: ["Pay Now", "Send Payment Link"],
+                    default: "Pay Now",
                     reqd: 1,
                   },
                 ],
-                primary_action_label: __("Create"),
+                primary_action_label: __("Continue"),
                 primary_action(values) {
                   if (
                     values.amount > 0 &&
-                    values.amount <= frm.doc.outstanding_amount
+                    values.amount <= max_amount
                   ) {
                     if (values.mode === "Pay Now") {
                       make_paystack_link(frm, {
@@ -126,7 +149,11 @@ frappe.ui.form.on("Sales Invoice", {
                         });
                     }
                   } else {
-                    frappe.throw("Amount must be > 0 or <= outstanding_amount");
+                    frappe.throw(
+                      __("Amount must be greater than 0 and not exceed {0}", [
+                        max_amount.toLocaleString(),
+                      ])
+                    );
                   }
                 },
               });
@@ -139,19 +166,26 @@ frappe.ui.form.on("Sales Invoice", {
   },
 });
 
-function make_paystack_link(
-  frm,
-  { doctype, docname, amount, currency },
-  opts = {},
-) {
+function make_paystack_link(frm, { doctype, docname, amount, currency }, opts = {}) {
   const payment_link = () =>
     frappe.call({
       method: "frappe_paystack.api.create_payment_link",
       args: { doctype, docname, amount, currency },
     });
 
+  frappe.show_alert({
+    message: __("Generating payment link..."),
+    indicator: "blue",
+  });
+
   payment_link()
-    .catch()
+    .catch((err) => {
+      frappe.msgprint({
+        title: __("Error"),
+        message: __("Could not generate Paystack link. Please try again."),
+        indicator: "red",
+      });
+    })
     .then((res) => {
       const url = res?.message;
       if (!url) {
@@ -164,14 +198,27 @@ function make_paystack_link(
 }
 
 function show_link_dialog(frm, url, opts) {
-  if (opts.send) {
-    if (opts.send) {
-      prompt_send_email(frm, url, opts);
-    }
+  if (opts && opts.send) {
+    prompt_send_email(frm, url, opts);
   } else {
     const d = new frappe.ui.Dialog({
       title: __("Pay via Paystack"),
+      size: "large",
       fields: [
+        {
+          fieldtype: "HTML",
+          fieldname: "info",
+          options: `
+            <div style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 16px; text-align: center;">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#0ba4db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <h5 style="margin: 0 0 4px 0; color: #0c4a6e;">Payment Link Generated</h5>
+              <p style="margin: 0; font-size: 13px; color: #64748b;">Share this link with the customer to collect payment securely</p>
+            </div>
+          `,
+        },
         {
           fieldtype: "Data",
           fieldname: "link",
@@ -181,7 +228,7 @@ function show_link_dialog(frm, url, opts) {
           bold: 1,
         },
       ],
-      primary_action_label: __("Open Link"),
+      primary_action_label: __("Open Payment Page"),
       primary_action: () => {
         window.open(url, "_blank");
         d.hide();
@@ -195,7 +242,7 @@ function show_link_dialog(frm, url, opts) {
         navigator.clipboard
           .writeText(val)
           .then(() =>
-            frappe.show_alert({ message: __("Copied!"), indicator: "green" }),
+            frappe.show_alert({ message: __("Link copied to clipboard!"), indicator: "green" }),
           );
       } else {
         frappe.msgprint(__("Copy this link") + ":<br>" + val);
@@ -209,7 +256,20 @@ function show_link_dialog(frm, url, opts) {
 function prompt_send_email(frm, url, opts) {
   const email_dialog = new frappe.ui.Dialog({
     title: __("Send Payment Link"),
+    size: "large",
     fields: [
+      {
+        fieldtype: "HTML",
+        fieldname: "info",
+        options: `
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+            <p style="margin: 0; font-size: 13px; color: #166534;">
+              <strong>Invoice:</strong> ${frm.doc.name} &nbsp;|&nbsp; 
+              <strong>Amount:</strong> ${frm.doc.currency} ${flt(frm.doc.outstanding_amount).toLocaleString()}
+            </p>
+          </div>
+        `,
+      },
       {
         fieldtype: "Data",
         fieldname: "to",
@@ -221,7 +281,7 @@ function prompt_send_email(frm, url, opts) {
         fieldtype: "Data",
         fieldname: "subject",
         label: __("Subject"),
-        default: __("Payment link for {0}", [frm.doc.name]),
+        default: __("Payment Request - {0}", [frm.doc.name]),
       },
       {
         fieldtype: "Small Text",
@@ -229,17 +289,19 @@ function prompt_send_email(frm, url, opts) {
         label: __("Message"),
         default:
           __("Hello,") +
+          "<br><br>" +
+          __("Please use the secure payment link below to complete your payment for <strong>{0}</strong>.", [frm.doc.name]) +
+          "<br><br>" +
+          `<a href="${url}" target="_blank" style="display: inline-block; background: #0ba4db; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Pay Now</a>` +
+          "<br><br>" +
+          __("Or copy this link:") +
           "<br>" +
-          __(
-            "Please use the Paystack link below to complete payment for {0}.",
-            [frm.doc.name],
-          ) +
-          "<br>" +
-          url +
-          __("<br><br>Thank you!"),
+          `<code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${url}</code>` +
+          "<br><br>" +
+          __("Thank you!"),
       },
     ],
-    primary_action_label: __("Send"),
+    primary_action_label: __("Send Email"),
     primary_action(values) {
       frappe
         .call({
@@ -254,12 +316,8 @@ function prompt_send_email(frm, url, opts) {
           },
         })
         .then(() => {
-          frappe.show_alert({ message: __("Email sent"), indicator: "green" });
+          frappe.show_alert({ message: __("Payment link email sent successfully"), indicator: "green" });
           email_dialog.hide();
-          frappe.show_alert({ message: __(), indicator: "green" });
-          frappe.msgprint(
-            `Payment link has been sent to ${frm.doc.customer} via ${opts.email}`,
-          );
         });
     },
   });

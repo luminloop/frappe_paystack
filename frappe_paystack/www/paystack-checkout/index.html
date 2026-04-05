@@ -1,150 +1,673 @@
- {% extends "templates/web.html" %}
- {% block title %}{{ _("Make Payment") }}{% endblock %}
+{% extends "templates/web.html" %}
+{% block title %}{{ _("Secure Payment") }}{% endblock %}
 
+{% block head_include %}
+<style>
+:root {
+    --paystack-primary: #0ba4db;
+    --paystack-primary-dark: #098bbf;
+    --paystack-success: #28a745;
+    --paystack-danger: #dc3545;
+    --paystack-warning: #ffc107;
+    --paystack-bg: #f8f9fa;
+    --paystack-card-bg: #ffffff;
+    --paystack-border: #e2e8f0;
+    --paystack-text: #1a202c;
+    --paystack-text-muted: #718096;
+    --paystack-radius: 12px;
+    --paystack-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --paystack-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+body {
+    background: var(--paystack-bg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.checkout-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+/* Header */
+.checkout-header {
+    background: var(--paystack-card-bg);
+    border-bottom: 1px solid var(--paystack-border);
+    padding: 16px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.checkout-header .container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.company-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.company-brand img {
+    height: 40px;
+    width: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.company-brand .company-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--paystack-text);
+    margin: 0;
+}
+
+.secure-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    color: var(--paystack-success);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Main Content */
+.checkout-content {
+    flex: 1;
+    padding: 32px 0;
+}
+
+.checkout-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+@media (max-width: 768px) {
+    .checkout-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+}
+
+/* Cards */
+.checkout-card {
+    background: var(--paystack-card-bg);
+    border-radius: var(--paystack-radius);
+    box-shadow: var(--paystack-shadow);
+    overflow: hidden;
+}
+
+.checkout-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--paystack-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkout-card-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--paystack-text);
+}
+
+.checkout-card-header .icon {
+    color: var(--paystack-primary);
+}
+
+.checkout-card-body {
+    padding: 24px;
+}
+
+/* Order Details */
+.order-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--paystack-border);
+}
+
+.order-detail:last-child {
+    border-bottom: none;
+}
+
+.order-detail .label {
+    font-size: 14px;
+    color: var(--paystack-text-muted);
+}
+
+.order-detail .value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--paystack-text);
+}
+
+.order-detail.total {
+    background: #f8f9fa;
+    margin: 0 -24px;
+    padding: 16px 24px;
+    border-top: 2px solid var(--paystack-border);
+}
+
+.order-detail.total .label {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--paystack-text);
+}
+
+.order-detail.total .value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--paystack-primary);
+}
+
+/* Amount Input */
+.amount-input-group {
+    margin-top: 16px;
+}
+
+.amount-input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paystack-text-muted);
+    margin-bottom: 6px;
+}
+
+.amount-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.amount-input-wrapper .currency-symbol {
+    position: absolute;
+    left: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--paystack-text-muted);
+    pointer-events: none;
+}
+
+.amount-input {
+    width: 100%;
+    padding: 12px 12px 12px 36px;
+    font-size: 18px;
+    font-weight: 600;
+    border: 2px solid var(--paystack-border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: var(--paystack-text);
+}
+
+.amount-input:focus {
+    border-color: var(--paystack-primary);
+}
+
+.amount-input::placeholder {
+    color: #cbd5e0;
+    font-weight: 400;
+}
+
+/* Email Input */
+.email-input-group {
+    margin-top: 20px;
+}
+
+.email-input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paystack-text-muted);
+    margin-bottom: 6px;
+}
+
+.email-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 2px solid var(--paystack-border);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+    color: var(--paystack-text);
+}
+
+.email-input:focus {
+    border-color: var(--paystack-primary);
+}
+
+.email-input.error {
+    border-color: var(--paystack-danger);
+}
+
+.email-error {
+    color: var(--paystack-danger);
+    font-size: 12px;
+    margin-top: 4px;
+    display: none;
+}
+
+.email-error.visible {
+    display: block;
+}
+
+/* Pay Button */
+.pay-btn {
+    width: 100%;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    background: var(--paystack-primary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pay-btn:hover {
+    background: var(--paystack-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(11, 164, 219, 0.3);
+}
+
+.pay-btn:active {
+    transform: translateY(0);
+}
+
+.pay-btn:disabled {
+    background: #a0aec0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.pay-btn .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+}
+
+.pay-btn.loading .spinner {
+    display: block;
+}
+
+.pay-btn.loading .btn-text {
+    display: none;
+}
+
+.pay-btn.loading .btn-loading-text {
+    display: inline;
+}
+
+.btn-loading-text {
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Security Footer */
+.security-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 24px;
+    background: #f8f9fa;
+    border-top: 1px solid var(--paystack-border);
+    font-size: 12px;
+    color: var(--paystack-text-muted);
+}
+
+.security-footer .icon {
+    color: var(--paystack-success);
+}
+
+/* Status Cards */
+.status-card {
+    max-width: 500px;
+    margin: 60px auto;
+    text-align: center;
+}
+
+.status-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 28px;
+}
+
+.status-icon.success {
+    background: #f0fdf4;
+    color: var(--paystack-success);
+}
+
+.status-icon.warning {
+    background: #fffbeb;
+    color: var(--paystack-warning);
+}
+
+.status-icon.danger {
+    background: #fef2f2;
+    color: var(--paystack-danger);
+}
+
+.status-card h4 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--paystack-text);
+}
+
+.status-card p {
+    font-size: 14px;
+    color: var(--paystack-text-muted);
+    margin-bottom: 16px;
+}
+
+.status-card .reference {
+    background: #f1f5f9;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 14px;
+    display: inline-block;
+}
+
+/* Footer */
+.checkout-footer {
+    background: var(--paystack-card-bg);
+    border-top: 1px solid var(--paystack-border);
+    padding: 16px 0;
+    text-align: center;
+    font-size: 12px;
+    color: var(--paystack-text-muted);
+}
+
+.checkout-footer a {
+    color: var(--paystack-primary);
+    text-decoration: none;
+}
+
+.checkout-footer .powered-by {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.checkout-footer .powered-by img {
+    height: 16px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .checkout-header .container {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .checkout-content {
+        padding: 16px 0;
+    }
+    
+    .checkout-card-body {
+        padding: 16px;
+    }
+    
+    .order-detail.total .value {
+        font-size: 18px;
+    }
+}
+</style>
+{% endblock %}
 
 {% block page_content %}
-<div id="app">
-    {% if reference and doc %}
-        {% if not doc.public_key %}
-            <div class="container mt-5" style="max-width: 600px;">
-                <div class="alert alert-warning shadow-lg border-0 rounded-3 d-flex align-items-center p-4" role="alert">
-                    <div class="me-3">
-                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <div>
-                        <h5 class="alert-heading mb-1 fw-bold">Payment Gatway is not Active.</h5>
-                        <p class="mb-0">Please contact the vendor.!</p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Reference:</strong>
-                            <span class="badge bg-dark fs-6 ms-2">{{reference}}</span>
-                        </p>
-                    </div>
-                    
+<div class="checkout-wrapper">
+    <!-- Header -->
+    {% if company %}
+    <div class="checkout-header">
+        <div class="container">
+            <div class="company-brand">
+                {% if company.logo %}
+                <img src="{{ company.logo }}" alt="{{ company.name }}">
+                {% else %}
+                <div style="width:40px;height:40px;background:var(--paystack-primary);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                    {{ company.name[0] }}
                 </div>
+                {% endif %}
+                <span class="company-name">{{ company.name }}</span>
             </div>
-        {% elif not doc.status in ["Completed", "Processed"]  and doc.order_status in ["Completed", "Closed'", "Paid"] %}
-            <div class="container mt-5" style="max-width: 600px;">
-                <div class="alert alert-warning shadow-lg border-0 rounded-3 d-flex align-items-center p-4" role="alert">
-                    <div class="me-3">
-                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <div>
-                        <h5 class="alert-heading mb-1 fw-bold">Payment Invalid</h5>
-                        <p class="mb-0">This payment link is invalid or expired!</p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Reference:</strong>
-                            <span class="badge bg-dark fs-6 ms-2">{{reference}}</span>
-                        </p>
-                    </div>
-                    
-                </div>
-            </div>
-        {% elif doc.status in ["Completed", "Processed"]  or doc.order_status in ["Completed", "Closed'", "Paid"]%}
-            <div class="container mt-5" style="max-width: 600px;">
-                <div class="alert alert-success shadow-lg border-0 rounded-3 d-flex align-items-center p-4" role="alert">
-                    <div class="me-3">
-                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <div>
-                        <h5 class="alert-heading mb-1 fw-bold">Payment Completed/Processed</h5>
-                        <p class="mb-0">Your payment has been successfully processed. Thank you for your purchase!</p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Reference:</strong>
-                            <span class="badge bg-dark fs-6 ms-2">{{reference}}</span>
-                        </p>
-                    </div>
-                    
-                </div>
-            </div>
-        {% elif doc.status == "Failed" %}
-            <div class="container mt-5" style="max-width: 600px;">
-                <div class="alert alert-warning shadow-lg border-0 rounded-3 d-flex align-items-center p-4" role="alert">
-                    <div class="me-3">
-                        <i class="bi bi-check-circle-fill" style="font-size: 2rem;"></i>
-                    </div>
-                    <div>
-                        <h5 class="alert-heading mb-1 fw-bold">Payment Failed</h5>
-                        <p class="mb-0">Your payment Failed!</p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Reference:</strong>
-                            <span class="badge bg-dark fs-6 ms-2">{{reference}}</span>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="container">
-                
-                <div class="container mt-4" style="max-width: 500px;">
-                <div class="card shadow-lg border-0 rounded-3">
-                    <div class="card-body">
-                    <h5 class="card-title fw-bold mb-3">
-                        <i class="bi bi-receipt-cutoff me-2"></i> Summary
-                    </h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Payment Reference</span>
-                            <span class="badge rounded-pill">{{ reference }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Invoice/Order No.</span>
-                            <span class="badge rounded-pill">{{doc.order_no}}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Order Amount</span>
-                            <span class="badge bg-success rounded-pill">{{doc.order_currency}} {{doc.grand_total}}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Payment Amount</span>
-                            <span class="badge rounded-pill">{{doc.currency}} {{doc.payment_amount}}</span>
-                        </li>
-                    </ul>
-                    </div>
-                </div>
-                </div>
-
-                <hr>
-                <div class="row">
-                    <div class="col-12 d-flex justify-content-center">
-                        <button class="btn  btn-success" id="paymentBTN"  @click="getData">Pay</button>
-                    </div>
-                </div>
-
-            </div>
-        {% endif %}
-    {% else %}
-    <div class="container mt-5" style="max-width: 600px;">
-        <div class="alert alert-danger shadow-lg border-0 rounded-3 d-flex align-items-center p-4" role="alert">
-            <div class="me-3">
-            <i class="bi bi-x-circle-fill" style="font-size: 2rem;"></i>
-            </div>
-            <div>
-            <h5 class="alert-heading mb-1 fw-bold">Invalid Payment Reference</h5>
-            <p class="mb-0">The payment reference could not be verified. Please check it and try again.</p>
-            <hr>
-            <p class="mb-0">
-                <strong>Reference:</strong>
-                <span class="badge bg-dark fs-6 ms-2">{{reference}}</span>
-            </p>
+            <div class="secure-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Secure Payment
             </div>
         </div>
     </div>
-
     {% endif %}
+
+    <!-- Content -->
+    <div class="checkout-content">
+        {% if reference and doc %}
+            {% if not doc.public_key %}
+                <div class="status-card">
+                    <div class="status-icon warning">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h4>Payment Gateway Inactive</h4>
+                    <p>Please contact {{ company.name if company else 'the administrator' }} to enable online payments.</p>
+                    <div class="reference">{{ reference }}</div>
+                </div>
+            {% elif doc.status in ["Completed", "Processed"] or doc.order_status in ["Completed", "Closed", "Paid"] %}
+                <div class="status-card">
+                    <div class="status-icon success">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <h4>Payment Completed</h4>
+                    <p>Your payment has been successfully processed. Thank you!</p>
+                    <div class="reference">{{ reference }}</div>
+                </div>
+            {% elif doc.status == "Failed" %}
+                <div class="status-card">
+                    <div class="status-icon danger">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <h4>Payment Failed</h4>
+                    <p>Your previous payment attempt failed. Please try again.</p>
+                    <div class="reference">{{ reference }}</div>
+                </div>
+            {% elif doc.order_docstatus in [0, 2] %}
+                <div class="status-card">
+                    <div class="status-icon warning">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <h4>Payment Link Expired</h4>
+                    <p>This payment link is no longer valid. Please request a new one.</p>
+                    <div class="reference">{{ reference }}</div>
+                </div>
+            {% else %}
+                <div class="checkout-container">
+                    <!-- Left: Order Summary -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-header">
+                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                            <h5>Payment Summary</h5>
+                        </div>
+                        <div class="checkout-card-body">
+                            {% if doc.student_name %}
+                            <div class="order-detail">
+                                <span class="label">Student</span>
+                                <span class="value">{{ doc.student_name }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="order-detail">
+                                <span class="label">Customer</span>
+                                <span class="value">{{ doc.customer_name }}</span>
+                            </div>
+                            <div class="order-detail">
+                                <span class="label">Invoice No.</span>
+                                <span class="value">{{ doc.order_no }}</span>
+                            </div>
+                            <div class="order-detail">
+                                <span class="label">Total Amount</span>
+                                <span class="value">{{ doc.order_currency }} {{ "{:,.2f}".format(doc.grand_total) }}</span>
+                            </div>
+                            {% if doc.already_paid > 0 %}
+                            <div class="order-detail">
+                                <span class="label">Already Paid</span>
+                                <span class="value" style="color: var(--paystack-success);">- {{ doc.order_currency }} {{ "{:,.2f}".format(doc.already_paid) }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="order-detail total">
+                                <span class="label">Amount Due</span>
+                                <span class="value">{{ doc.order_currency }} {{ "{:,.2f}".format(doc.outstanding_amount or doc.payment_amount) }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Payment Form -->
+                    <div class="checkout-card">
+                        <div class="checkout-card-header">
+                            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <h5>Make Payment</h5>
+                        </div>
+                        <div class="checkout-card-body">
+                            <!-- Email Input -->
+                            <div class="email-input-group">
+                                <label for="payerEmail">Email Address</label>
+                                <input type="email" id="payerEmail" class="email-input" 
+                                       placeholder="your@email.com" 
+                                       value="{{ doc.email or '' }}">
+                                <div class="email-error" id="emailError">Please enter a valid email address</div>
+                            </div>
+
+                            <!-- Amount Input -->
+                            <div class="amount-input-group">
+                                <label for="payAmount">Payment Amount</label>
+                                <div class="amount-input-wrapper">
+                                    <span class="currency-symbol">{{ doc.order_currency }}</span>
+                                    <input type="number" id="payAmount" class="amount-input" 
+                                           placeholder="{{ '{:,.2f}'.format(doc.outstanding_amount or doc.payment_amount) }}"
+                                           value="{{ doc.outstanding_amount or doc.payment_amount }}"
+                                           min="1" step="0.01">
+                                </div>
+                            </div>
+
+                            <!-- Pay Button -->
+                            <button class="pay-btn" id="paymentBTN" onclick="initiatePayment()">
+                                <span class="btn-text">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                    </svg>
+                                    Pay Now
+                                </span>
+                                <span class="spinner"></span>
+                                <span class="btn-loading-text">Processing...</span>
+                            </button>
+
+                            <!-- Security Footer -->
+                            <div class="security-footer" style="margin: 16px -24px -24px; border-radius: 0 0 var(--paystack-radius) var(--paystack-radius);">
+                                <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                                <span>Your payment information is encrypted and secure</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="status-card">
+                <div class="status-icon danger">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                </div>
+                <h4>Invalid Payment Link</h4>
+                <p>The payment reference could not be verified. Please check the link and try again.</p>
+                {% if reference %}
+                <div class="reference">{{ reference }}</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="checkout-footer">
+        <div class="powered-by">
+            <span>Secured by</span>
+            <a href="https://paystack.com" target="_blank" rel="noopener">
+                <img src="https://assets.paystack.com/images/logo-light-text.svg" alt="Paystack" style="filter: brightness(0) saturate(100%) invert(44%) sepia(93%) saturate(1352%) hue-rotate(166deg) brightness(90%) contrast(88%); height: 16px;">
+            </a>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block script %}
-<script src="/assets/frappe_paystack/js/vue.global.js"></script>
 <script src="/assets/frappe_paystack/js/sweetalert2@11.js"></script>
-<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://js.paystack.co/v2/inline.js"></script>
 <script>
-  window.doc = {{ doc | safe }};
-  window.reference = "{{ reference }}";
+window.doc = {{ doc | safe }};
+window.reference = "{{ reference }}";
+window.company = {{ company | safe if company else '{}' }};
 </script>
 <script src="/assets/frappe_paystack/js/paystack-checkout/index.js"></script>
 {% endblock %}
