@@ -586,11 +586,12 @@ body {
                                 <span class="label">Student</span>
                                 <span class="value">{{ doc.student_name }}</span>
                             </div>
-                            {% endif %}
+                            {% else %}
                             <div class="order-detail">
                                 <span class="label">Customer</span>
                                 <span class="value">{{ doc.customer_name }}</span>
                             </div>
+                            {% endif %}
                             <div class="order-detail">
                                 <span class="label">Invoice No.</span>
                                 <span class="value">{{ doc.order_no }}</span>
