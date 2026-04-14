@@ -3,6 +3,32 @@ from frappe.utils import flt, fmt_money
 
 PAYMENT_LOG = "Paystack Payment Log"
 
+
+def _get_company_address(company_name):
+    """Return the default address for a Company as a single-line string, or ''."""
+    address_name = frappe.db.get_value(
+        "Dynamic Link",
+        {
+            "link_doctype": "Company",
+            "link_name": company_name,
+            "parenttype": "Address",
+        },
+        "parent",
+    )
+    if not address_name:
+        return ""
+    addr = frappe.db.get_value(
+        "Address",
+        address_name,
+        ["address_line1", "address_line2", "city", "state", "country"],
+        as_dict=True,
+    )
+    if not addr:
+        return ""
+    parts = [addr.address_line1, addr.address_line2, addr.city, addr.state, addr.country]
+    return ", ".join(p for p in parts if p)
+
+
 def get_context(context):
     context.title = "Paystack Checkout"
     reference = frappe.form_dict.reference
@@ -19,7 +45,7 @@ def get_context(context):
             context.company = {
                 "name": company.company_name,
                 "logo": company.company_logo or "",
-                "address": company.address or "",
+                "address": _get_company_address(company.name),
                 "phone": company.phone_no or "",
                 "email": company.email or "",
                 "currency": company.default_currency or "KES",

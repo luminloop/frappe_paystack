@@ -281,24 +281,41 @@ function prompt_send_email(frm, url, opts) {
         fieldtype: "Data",
         fieldname: "subject",
         label: __("Subject"),
-        default: __("Payment Request - {0}", [frm.doc.name]),
+        default: __("School Fees Payment{0} - Invoice {1}", [
+          frm.doc.student_name ? ` for ${frm.doc.student_name}` : "",
+          frm.doc.name,
+        ]),
       },
       {
         fieldtype: "Small Text",
         fieldname: "message",
         label: __("Message"),
         default:
-          __("Hello,") +
+          __("Dear Parent / Guardian,") +
           "<br><br>" +
-          __("Please use the secure payment link below to complete your payment for <strong>{0}</strong>.", [frm.doc.name]) +
+          __("This is a reminder to settle the outstanding school fees{0}.", [
+            frm.doc.student_name ? ` for <strong>${frm.doc.student_name}</strong>` : "",
+          ]) +
           "<br><br>" +
-          `<a href="${url}" target="_blank" style="display: inline-block; background: #0ba4db; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">Pay Now</a>` +
+          `<table style="border-collapse: collapse; font-size: 14px; margin: 8px 0;">
+             <tr><td style="padding: 4px 12px 4px 0; color: #475569;">${__("Invoice")}</td><td style="padding: 4px 0;"><strong>${frm.doc.name}</strong></td></tr>
+             <tr><td style="padding: 4px 12px 4px 0; color: #475569;">${__("Amount Due")}</td><td style="padding: 4px 0;"><strong>${frm.doc.currency} ${flt(frm.doc.outstanding_amount).toLocaleString()}</strong></td></tr>
+             ${frm.doc.due_date ? `<tr><td style="padding: 4px 12px 4px 0; color: #475569;">${__("Due Date")}</td><td style="padding: 4px 0;">${frm.doc.due_date}</td></tr>` : ""}
+           </table>` +
+          "<br>" +
+          __("Click the button below to pay securely via Paystack.") +
           "<br><br>" +
-          __("Or copy this link:") +
+          `<a href="${url}" target="_blank" style="display: inline-block; background: #0ba4db; color: #fff; padding: 10px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">${__("Pay School Fees")}</a>` +
+          "<br><br>" +
+          __("If the button does not work, copy and paste this link into your browser:") +
           "<br>" +
           `<code style="background: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${url}</code>` +
           "<br><br>" +
-          __("Thank you!"),
+          __("If you have already paid, please ignore this message.") +
+          "<br><br>" +
+          __("Thank you,") +
+          "<br>" +
+          __("The School Administration"),
       },
     ],
     primary_action_label: __("Send Email"),
