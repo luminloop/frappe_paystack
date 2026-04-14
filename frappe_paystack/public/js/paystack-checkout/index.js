@@ -24,7 +24,7 @@ createApp({
                 icon: 'warning',
                 title: 'Invalid Amount',
                 text: 'Please enter a valid payment amount.',
-                confirmButtonColor: '#0ba4db'
+                confirmButtonColor: '#22c55e'
             });
             return;
         }
@@ -55,7 +55,7 @@ createApp({
                     icon: 'warning',
                     title: 'Payment Cancelled',
                     text: 'You cancelled the payment. You can try again anytime.',
-                    confirmButtonColor: '#0ba4db'
+                    confirmButtonColor: '#22c55e'
                 });
             },
             callback: function(response){
@@ -127,7 +127,7 @@ createApp({
                 icon: 'warning',
                 title: 'Invalid Amount',
                 text: 'Please enter a valid payment amount greater than zero.',
-                confirmButtonColor: '#0ba4db'
+                confirmButtonColor: '#22c55e'
             });
             return;
         }
@@ -137,7 +137,7 @@ createApp({
                 icon: 'warning',
                 title: 'Amount Exceeds Balance',
                 text: `The amount exceeds your outstanding balance of ${me.doc.order_currency} ${maxAmount.toLocaleString()}.`,
-                confirmButtonColor: '#0ba4db'
+                confirmButtonColor: '#22c55e'
             });
             return;
         }

@@ -4,8 +4,9 @@
 {% block head_include %}
 <style>
 :root {
-    --paystack-primary: #0ba4db;
-    --paystack-primary-dark: #098bbf;
+    --paystack-primary: #22c55e;
+    --paystack-primary-dark: #16a34a;
+    --paystack-primary-ring: rgba(34, 197, 94, 0.25);
     --paystack-success: #28a745;
     --paystack-danger: #dc3545;
     --paystack-warning: #ffc107;
@@ -287,7 +288,7 @@ body {
 .pay-btn:hover {
     background: var(--paystack-primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(11, 164, 219, 0.3);
+    box-shadow: 0 4px 12px var(--paystack-primary-ring);
 }
 
 .pay-btn:active {
@@ -431,29 +432,64 @@ body {
 
 /* Responsive */
 @media (max-width: 576px) {
+    .checkout-header {
+        padding: 12px 0;
+    }
+
     .checkout-header .container {
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
         text-align: center;
     }
-    
+
     .checkout-content {
         padding: 16px 0;
     }
-    
-    .checkout-card-body {
-        padding: 16px;
+
+    .checkout-container {
+        padding: 0 12px;
     }
-    
+
+    .checkout-card-header {
+        padding: 16px 18px;
+    }
+
+    .checkout-card-body {
+        padding: 18px;
+    }
+
+    .order-detail.total {
+        margin: 0 -18px;
+        padding: 14px 18px;
+    }
+
     .order-detail.total .value {
         font-size: 18px;
+    }
+
+    .amount-input {
+        font-size: 16px;
+    }
+
+    .pay-btn {
+        padding: 14px 18px;
+        font-size: 15px;
+    }
+
+    .security-footer {
+        padding: 14px 18px;
+        margin: 16px -18px -18px !important;
+    }
+
+    .status-card {
+        margin: 40px 16px;
     }
 }
 </style>
 {% endblock %}
 
 {% block page_content %}
-<div class="checkout-wrapper">
+<div id="app" class="checkout-wrapper">
     <!-- Header -->
     {% if company %}
     <div class="checkout-header">
@@ -654,7 +690,7 @@ body {
         <div class="powered-by">
             <span>Secured by</span>
             <a href="https://paystack.com" target="_blank" rel="noopener">
-                <img src="https://assets.paystack.com/images/logo-light-text.svg" alt="Paystack" style="filter: brightness(0) saturate(100%) invert(44%) sepia(93%) saturate(1352%) hue-rotate(166deg) brightness(90%) contrast(88%); height: 16px;">
+                <img src="https://assets.paystack.com/images/logo-light-text.svg" alt="Paystack" style="height: 16px; opacity: 0.8;">
             </a>
         </div>
     </div>
