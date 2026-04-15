@@ -4,25 +4,37 @@
 {% block head_include %}
 <style>
 :root {
-    --paystack-primary: #22c55e;
-    --paystack-primary-dark: #16a34a;
-    --paystack-primary-ring: rgba(34, 197, 94, 0.25);
-    --paystack-success: #28a745;
-    --paystack-danger: #dc3545;
-    --paystack-warning: #ffc107;
-    --paystack-bg: #f8f9fa;
-    --paystack-card-bg: #ffffff;
-    --paystack-border: #e2e8f0;
-    --paystack-text: #1a202c;
-    --paystack-text-muted: #718096;
-    --paystack-radius: 12px;
-    --paystack-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --paystack-shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --paystack-background: hsl(0 0% 100%);
+    --paystack-foreground: hsl(240 10% 3.9%);
+    --paystack-card-bg: hsl(0 0% 100%);
+    --paystack-muted: hsl(240 4.8% 95.9%);
+    --paystack-muted-foreground: hsl(240 3.8% 46.1%);
+    --paystack-border: hsl(240 5.9% 90%);
+    --paystack-input: hsl(240 5.9% 90%);
+    --paystack-primary: hsl(142 71% 45%);
+    --paystack-primary-dark: hsl(142 76% 36%);
+    --paystack-primary-ring: hsl(142 71% 45% / 0.30);
+    --paystack-primary-foreground: hsl(0 0% 98%);
+    --paystack-success: hsl(142 71% 45%);
+    --paystack-danger: hsl(0 84% 60%);
+    --paystack-warning: hsl(38 92% 50%);
+    --paystack-bg: hsl(240 4.8% 97.5%);
+    --paystack-text: hsl(240 10% 3.9%);
+    --paystack-text-muted: hsl(240 3.8% 46.1%);
+    --paystack-radius: 0.75rem;
+    --paystack-radius-md: 0.5rem;
+    --paystack-radius-sm: 0.375rem;
+    --paystack-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --paystack-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --paystack-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.06), 0 4px 6px -4px rgb(0 0 0 / 0.04);
 }
 
 body {
     background: var(--paystack-bg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--paystack-foreground);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
 }
 
 .checkout-wrapper {
@@ -36,8 +48,7 @@ body {
 .checkout-header {
     background: var(--paystack-card-bg);
     border-bottom: 1px solid var(--paystack-border);
-    padding: 16px 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    padding: 14px 0;
 }
 
 .checkout-header .container {
@@ -49,33 +60,39 @@ body {
 .company-brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .company-brand img {
-    height: 40px;
-    width: 40px;
+    height: 36px;
+    width: 36px;
     object-fit: contain;
-    border-radius: 8px;
+    border-radius: var(--paystack-radius-md);
 }
 
 .company-brand .company-name {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--paystack-text);
     margin: 0;
 }
 
 .secure-badge {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #f0fdf4;
-    color: var(--paystack-success);
-    padding: 6px 12px;
-    border-radius: 20px;
+    background: var(--paystack-muted);
+    color: var(--paystack-text);
+    padding: 5px 10px;
+    border-radius: 9999px;
     font-size: 12px;
     font-weight: 500;
+    border: 1px solid var(--paystack-border);
+}
+
+.secure-badge svg {
+    color: var(--paystack-primary);
 }
 
 /* Main Content */
@@ -104,13 +121,13 @@ body {
 .checkout-card {
     background: var(--paystack-card-bg);
     border-radius: var(--paystack-radius);
-    box-shadow: var(--paystack-shadow);
+    box-shadow: var(--paystack-shadow-sm);
+    border: 1px solid var(--paystack-border);
     overflow: hidden;
 }
 
 .checkout-card-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--paystack-border);
+    padding: 20px 24px 16px;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -118,17 +135,20 @@ body {
 
 .checkout-card-header h5 {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
+    letter-spacing: -0.01em;
     color: var(--paystack-text);
 }
 
 .checkout-card-header .icon {
-    color: var(--paystack-primary);
+    color: var(--paystack-text-muted);
+    width: 18px;
+    height: 18px;
 }
 
 .checkout-card-body {
-    padding: 24px;
+    padding: 4px 24px 24px;
 }
 
 /* Order Details */
@@ -136,129 +156,164 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--paystack-border);
+    padding: 10px 0;
 }
 
-.order-detail:last-child {
-    border-bottom: none;
+.order-detail + .order-detail {
+    border-top: 1px solid var(--paystack-border);
 }
 
 .order-detail .label {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--paystack-text-muted);
 }
 
 .order-detail .value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--paystack-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.order-detail.total {
+    background: var(--paystack-muted);
+    margin: 12px -24px -24px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--paystack-border);
+}
+
+.order-detail.total .label {
     font-size: 14px;
     font-weight: 500;
     color: var(--paystack-text);
 }
 
-.order-detail.total {
-    background: #f8f9fa;
-    margin: 0 -24px;
-    padding: 16px 24px;
-    border-top: 2px solid var(--paystack-border);
-}
-
-.order-detail.total .label {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--paystack-text);
-}
-
 .order-detail.total .value {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    color: var(--paystack-primary);
+    letter-spacing: -0.02em;
+    color: var(--paystack-text);
+    font-variant-numeric: tabular-nums;
 }
 
 /* Amount Input */
 .amount-input-group {
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
 .amount-input-group label {
     display: block;
     font-size: 13px;
     font-weight: 500;
-    color: var(--paystack-text-muted);
-    margin-bottom: 6px;
+    color: var(--paystack-text);
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
 }
 
 .amount-input-wrapper {
     position: relative;
     display: flex;
-    align-items: center;
+    align-items: stretch;
+    border: 1px solid var(--paystack-input);
+    border-radius: var(--paystack-radius-md);
+    background: var(--paystack-card-bg);
+    transition: box-shadow 0.15s, border-color 0.15s;
+    overflow: hidden;
+}
+
+.amount-input-wrapper:focus-within {
+    border-color: var(--paystack-primary);
+    box-shadow: 0 0 0 3px var(--paystack-primary-ring);
 }
 
 .amount-input-wrapper .currency-symbol {
-    position: absolute;
-    left: 12px;
-    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    font-size: 13px;
     font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--paystack-text-muted);
+    background: var(--paystack-muted);
+    border-right: 1px solid var(--paystack-border);
     pointer-events: none;
 }
 
 .amount-input {
     width: 100%;
-    padding: 12px 12px 12px 36px;
+    padding: 12px 14px;
     font-size: 18px;
     font-weight: 600;
-    border: 2px solid var(--paystack-border);
-    border-radius: 8px;
+    letter-spacing: -0.01em;
+    border: none;
+    background: transparent;
     outline: none;
-    transition: border-color 0.2s;
     color: var(--paystack-text);
+    font-variant-numeric: tabular-nums;
+    -moz-appearance: textfield;
 }
 
-.amount-input:focus {
-    border-color: var(--paystack-primary);
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .amount-input::placeholder {
-    color: #cbd5e0;
-    font-weight: 400;
+    color: hsl(240 5% 70%);
+    font-weight: 500;
+}
+
+.amount-hint {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--paystack-text-muted);
 }
 
 /* Email Input */
 .email-input-group {
-    margin-top: 20px;
+    margin-top: 4px;
 }
 
 .email-input-group label {
     display: block;
     font-size: 13px;
     font-weight: 500;
-    color: var(--paystack-text-muted);
-    margin-bottom: 6px;
+    color: var(--paystack-text);
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
 }
 
 .email-input {
     width: 100%;
-    padding: 12px 16px;
+    padding: 10px 12px;
     font-size: 14px;
-    border: 2px solid var(--paystack-border);
-    border-radius: 8px;
+    border: 1px solid var(--paystack-input);
+    border-radius: var(--paystack-radius-md);
     outline: none;
-    transition: border-color 0.2s;
+    transition: box-shadow 0.15s, border-color 0.15s;
     color: var(--paystack-text);
+    background: var(--paystack-card-bg);
 }
 
 .email-input:focus {
     border-color: var(--paystack-primary);
+    box-shadow: 0 0 0 3px var(--paystack-primary-ring);
+}
+
+.email-input::placeholder {
+    color: hsl(240 5% 70%);
 }
 
 .email-input.error {
     border-color: var(--paystack-danger);
+    box-shadow: 0 0 0 3px hsl(0 84% 60% / 0.18);
 }
 
 .email-error {
     color: var(--paystack-danger);
     font-size: 12px;
-    margin-top: 4px;
+    margin-top: 6px;
     display: none;
 }
 
@@ -269,37 +324,50 @@ body {
 /* Pay Button */
 .pay-btn {
     width: 100%;
-    padding: 14px 24px;
-    font-size: 16px;
+    padding: 11px 20px;
+    height: 44px;
+    font-size: 14px;
     font-weight: 600;
-    color: #ffffff;
+    letter-spacing: -0.005em;
+    color: var(--paystack-primary-foreground);
     background: var(--paystack-primary);
-    border: none;
-    border-radius: 8px;
+    border: 1px solid var(--paystack-primary);
+    border-radius: var(--paystack-radius-md);
     cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 24px;
-    display: flex;
+    transition: background-color 0.15s, box-shadow 0.15s;
+    margin-top: 20px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+    box-shadow: var(--paystack-shadow-sm);
 }
 
 .pay-btn:hover {
     background: var(--paystack-primary-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--paystack-primary-ring);
+    border-color: var(--paystack-primary-dark);
+}
+
+.pay-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--paystack-primary-ring);
 }
 
 .pay-btn:active {
-    transform: translateY(0);
+    transform: translateY(0.5px);
 }
 
 .pay-btn:disabled {
-    background: #a0aec0;
+    background: hsl(240 5% 75%);
+    border-color: hsl(240 5% 75%);
     cursor: not-allowed;
-    transform: none;
     box-shadow: none;
+}
+
+.pay-btn .btn-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .pay-btn .spinner {
@@ -337,16 +405,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    padding: 16px 24px;
-    background: #f8f9fa;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--paystack-muted);
     border-top: 1px solid var(--paystack-border);
     font-size: 12px;
     color: var(--paystack-text-muted);
 }
 
 .security-footer .icon {
-    color: var(--paystack-success);
+    color: var(--paystack-text-muted);
 }
 
 /* Status Cards */
@@ -637,11 +705,12 @@ body {
                                 <label for="payAmount">Payment Amount</label>
                                 <div class="amount-input-wrapper">
                                     <span class="currency-symbol">{{ doc.order_currency }}</span>
-                                    <input type="number" id="payAmount" class="amount-input" 
-                                           placeholder="{{ '{:,.2f}'.format(doc.outstanding_amount or doc.payment_amount) }}"
-                                           value="{{ doc.outstanding_amount or doc.payment_amount }}"
-                                           min="1" step="0.01">
+                                    <input type="number" id="payAmount" class="amount-input"
+                                           placeholder="0.00"
+                                           value="{{ '{:.2f}'.format(doc.outstanding_amount or doc.payment_amount) }}"
+                                           min="1" step="0.01" inputmode="decimal">
                                 </div>
+                                <p class="amount-hint">Outstanding balance: {{ doc.order_currency }} {{ "{:,.2f}".format(doc.outstanding_amount or doc.payment_amount) }}</p>
                             </div>
 
                             <!-- Pay Button -->
@@ -706,5 +775,5 @@ window.doc = {{ doc | safe }};
 window.reference = "{{ reference }}";
 window.company = {{ company | safe if company else '{}' }};
 </script>
-<script src="/assets/frappe_paystack/js/paystack-checkout/index.js"></script>
+<script src="/assets/frappe_paystack/js/paystack-checkout/index.js?v={{ frappe.utils.now() | urlencode }}"></script>
 {% endblock %}
